@@ -2,54 +2,54 @@ import time
 import board
 import busio
 from adafruit_ssd1306 import SSD1306_I2C
-from adafruit_framebuf import FrameBuffer, MVLSB
+from PIL import Image, ImageDraw, ImageFont
 
-# I2C Setup
+# I2C setup
 i2c = busio.I2C(board.SCL, board.SDA)
+
+# OLED display dimensions
 WIDTH = 128
 HEIGHT = 64
 
-# Initialize SSD1306 OLED Display
+# Initialize the SSD1306 OLED display
 oled = SSD1306_I2C(WIDTH, HEIGHT, i2c)
 
-# Turn off display (clears screen and sends OFF command)
-def turn_off_display():
-    oled.fill(0)  # Clear the display
-    oled.show()
-    oled.poweroff()  # Turn off the display hardware
+# Clear the OLED display
+oled.fill(0)
+oled.show()
 
-# Turn on display
-def turn_on_display():
-    oled.poweron()  # Turn on the display hardware
-    oled.fill(0)  # Clear the display
-    oled.text("Display ON!", 10, 10, 1)  # Draw text
-    oled.show()
+# Create a blank image for drawing
+image = Image.new("1", (WIDTH, HEIGHT))  # 1-bit color
+draw = ImageDraw.Draw(image)
 
-# Draw Graphics Example
-def draw_graphics():
-    oled.fill(0)  # Clear the display
-    oled.text("Shapes!", 10, 10, 1)
-    oled.rect(20, 20, 40, 20, 1)  # Draw rectangle
-    oled.circle(80, 40, 10, 1)    # Draw circle
+# Load default font
+font = ImageFont.load_default()
+
+# Function to display text
+def display_message(message):
+    draw.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)  # Clear screen
+    draw.text((10, 25), message, font=font, fill=255)         # Display message
+    oled.image(image)
     oled.show()
 
+# Main loop: display messages
 try:
-    # Turn on the display
-    print("Turning ON the display...")
-    turn_on_display()
-    time.sleep(2)
+    print("Displaying LED ON...")
+    display_message("LED ON")
+    time.sleep(2)  # Show "LED ON" for 2 seconds
 
-    # Draw graphics
-    print("Drawing graphics...")
-    draw_graphics()
-    time.sleep(5)
+    print("Displaying LED OFF...")
+    display_message("LED OFF")
+    time.sleep(2)  # Show "LED OFF" for 2 seconds
 
-    # Turn off the display
-    print("Turning OFF the display...")
-    turn_off_display()
+    print("Displaying Hello World...")
+    display_message("Hello World")
+    time.sleep(2)  # Show "Hello World" for 2 seconds
 
 except KeyboardInterrupt:
-    print("Interrupted!")
+    print("Program interrupted!")
+
 finally:
+    # Clear display on exit
     oled.fill(0)
     oled.show()
